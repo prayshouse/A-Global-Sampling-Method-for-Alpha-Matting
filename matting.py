@@ -36,7 +36,7 @@ def get_estimate_alpha(i, f, b):
     tmp3 = sum(tmp1 * tmp2)
     tmp4 = sum((int_f - int_b) * (int_f - int_b))
     if tmp4 == 0:
-        return 0
+        return 1
     else:
         return min(max(tmp3 / tmp4, 0.0), 1.0)
 
@@ -74,14 +74,14 @@ def get_nearest_distance(x, y, border_list, max_distance_square):
         tmp = (border_list[i][0] - x) * (border_list[i][0] - x) + (border_list[i][1] - y) * (border_list[i][1] - y)
         if nearest > tmp:
             nearest = tmp
-            nearest_index = i
-    return nearest
+    return np.sqrt(nearest)
 
 
 # match the pixels in unknown areas with a sample
 def sample_match(img, trimap, foreborder, backborder, unknown_seq):
     rows, cols, _ = img.shape
     sample = np.zeros((rows, cols, 5), dtype='int')
+
     for (i, j) in unknown_seq:
         sample[i, j, FOREBORDER_INDEX] = random.randint(0, len(foreborder) - 1)
         sample[i, j, BACKBORDER_INDEX] = random.randint(0, len(backborder) - 1)
@@ -90,12 +90,15 @@ def sample_match(img, trimap, foreborder, backborder, unknown_seq):
         sample[i, j, EPSILON] = sys.maxint
 
     for iteration in range(0, 10):
+        print iteration*10, "%"
+        random.shuffle(unknown_seq)
         # propagation
         for (m, n) in unknown_seq:
             # calculate epsilon among first order neighborhood
-            for (x, y) in [(m, n), (m+1, n), (m-1, n), (m, n+1), (m, n-1)]:
+            for (x, y) in [(m-1, n-1), (m-1, n), (m-1, n+1),
+                           (m, n-1), (m, n), (m, n+1),
+                           (m+1, n-1), (m+1, n), (m+1, n+1)]:
                 if 0 <= x < rows and 0 <= y < cols and trimap[x, y] == TRIMAP_GRAY:
-                    print x, y
                     f_item = foreborder[sample[x, y, FOREBORDER_INDEX]]
                     b_item = backborder[sample[x, y, BACKBORDER_INDEX]]
                     f = img[f_item[0], f_item[1]]
@@ -107,7 +110,7 @@ def sample_match(img, trimap, foreborder, backborder, unknown_seq):
                     phi = get_epsilon(i, f, b, f_item[0], f_item[1], b_item[0], b_item[1], x, y, f_nearest, b_nearest)
                     if phi < sample[x, y, EPSILON]:
                         sample[m, n, FOREBORDER_INDEX] = sample[x, y, FOREBORDER_INDEX]
-                        sample[m, n, BACKBORDER_INDEX] = sample[x, y, FOREBORDER_INDEX]
+                        sample[m, n, BACKBORDER_INDEX] = sample[x, y, BACKBORDER_INDEX]
                         sample[m, n, EPSILON] = phi
 
         # Random Search
@@ -184,17 +187,18 @@ def main():
     trimap = scipy.misc.imread('trollTrimap.bmp', flatten='True')
 
     alpha = matting(img, trimap)
-    rows, cols, channel = img.shape
     show(alpha)
-    count = 0
+    rows, cols, channel = img.shape
+
+    src = cv2.imread('troll.png', cv2.IMREAD_UNCHANGED)
+    b, g, r = cv2.split(src)
+    alpha_channel = np.ones(b.shape, dtype=b.dtype)
     for i in range(0, rows):
         for j in range(0, cols):
-            if 0 < alpha[i, j] < 1:
-                count = count + 1
-    print "count", count
-
-    plt.imshow((alpha.reshape(rows, cols, 1).repeat(3, 2)*img).astype(np.uint8))
-    plt.show()
+            alpha_channel[i, j] = alpha[i, j] * 255
+    src = cv2.merge((b, g, r, alpha_channel))
+    cv2.imwrite("output.png", src)
+    cv2.waitKey(0)
 
 if __name__ == "__main__":
     import scipy.misc
