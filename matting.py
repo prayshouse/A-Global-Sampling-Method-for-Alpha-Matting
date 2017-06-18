@@ -15,6 +15,7 @@ BACKBORDER_INDEX = 1
 TO_FOREBORDER_DISTANCE = 2
 TO_BACKBORDER_DISTANCE = 3
 EPSILON = 4
+ALPHA = 5
 
 
 # get the border of an area
@@ -80,7 +81,7 @@ def get_nearest_distance(x, y, border_list, max_distance_square):
 # match the pixels in unknown areas with a sample
 def sample_match(img, trimap, foreborder, backborder, unknown_seq):
     rows, cols, _ = img.shape
-    sample = np.zeros((rows, cols, 5), dtype='int')
+    sample = np.zeros((rows, cols, 6), dtype='int')
 
     for (i, j) in unknown_seq:
         sample[i, j, FOREBORDER_INDEX] = random.randint(0, len(foreborder) - 1)
@@ -88,7 +89,9 @@ def sample_match(img, trimap, foreborder, backborder, unknown_seq):
         sample[i, j, TO_FOREBORDER_DISTANCE] = get_nearest_distance(i, j, foreborder, rows * rows + cols * cols)
         sample[i, j, TO_BACKBORDER_DISTANCE] = get_nearest_distance(i, j, backborder, rows * rows + cols * cols)
         sample[i, j, EPSILON] = sys.maxint
+        sample[i, j, ALPHA] = 0
 
+    count = 0
     for iteration in range(0, 10):
         print iteration*10, "%"
         random.shuffle(unknown_seq)
@@ -107,11 +110,16 @@ def sample_match(img, trimap, foreborder, backborder, unknown_seq):
                     f_nearest = sample[x, y, TO_FOREBORDER_DISTANCE]
                     b_nearest = sample[x, y, TO_BACKBORDER_DISTANCE]
 
-                    phi = get_epsilon(i, f, b, f_item[0], f_item[1], b_item[0], b_item[1], x, y, f_nearest, b_nearest)
+                    alpha = get_estimate_alpha(i, f, b)
+                    f_dist = get_epsilon_s(f_item[0], f_item[1], m, n, f_nearest)
+                    b_dist = get_epsilon_s(b_item[0], b_item[1], m, n, b_nearest)
+                    #phi = get_epsilon(i, f, b, f_item[0], f_item[1], b_item[0], b_item[1], x, y, f_nearest, b_nearest)
+                    phi = get_epsilon_c(i, f, b, alpha) + f_dist + b_dist
                     if phi < sample[x, y, EPSILON]:
                         sample[m, n, FOREBORDER_INDEX] = sample[x, y, FOREBORDER_INDEX]
                         sample[m, n, BACKBORDER_INDEX] = sample[x, y, BACKBORDER_INDEX]
                         sample[m, n, EPSILON] = phi
+                        sample[m, n, ALPHA] = alpha
 
         # Random Search
         w = max(len(foreborder), len(backborder))
@@ -122,9 +130,10 @@ def sample_match(img, trimap, foreborder, backborder, unknown_seq):
                 r = w * pow(0.5, k)
                 if r < 1:
                     break
-                f_new_index = sample[x, y, FOREBORDER_INDEX] + int(r * (random.randint(0, 100 - 1) / 100))
-                b_new_index = sample[x, y, BACKBORDER_INDEX] + int(r * (random.randint(0, 100 - 1) / 100))
+                f_new_index = (sample[x, y, FOREBORDER_INDEX] + int(r * (random.randint(0, 100 - 1) / 100))) % len(foreborder)
+                b_new_index = (sample[x, y, BACKBORDER_INDEX] + int(r * (random.randint(0, 100 - 1) / 100))) % len(backborder)
                 if 0 <= f_new_index < len(foreborder) and 0 <= b_new_index < len(backborder):
+                    count = count + 1
                     f_item = foreborder[f_new_index]
                     b_item = backborder[b_new_index]
                     f = img[f_item[0], f_item[1]]
@@ -136,6 +145,7 @@ def sample_match(img, trimap, foreborder, backborder, unknown_seq):
                         sample[x, y, FOREBORDER_INDEX] = f_new_index
                         sample[x, y, BACKBORDER_INDEX] = b_new_index
                 k = k + 1
+    print count
     return sample
 
 
@@ -151,6 +161,14 @@ def matting(img, trimap):
     print "calculate border"
     foreborder = get_border(trimap, TRIMAP_WHITE)
     backborder = get_border(trimap, TRIMAP_BLACK)
+
+    for i in range(0, len(foreborder) + len(backborder)):
+        x = random.randint(0, rows - 1)
+        y = random.randint(0, cols - 1)
+        if trimap[x, y] == TRIMAP_WHITE:
+            foreborder.append((x, y))
+        elif trimap[x, y] == TRIMAP_BLACK:
+            backborder.append((x, y))
     unknown_seq = [(i, j) for i in range(0, rows) for j in range(0, cols) if trimap[i, j] == TRIMAP_GRAY]
 
     print "match samples"
