@@ -18,8 +18,8 @@
       <file leaf-file-name="matting.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/matting.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2944">
-              <caret line="184" column="0" lean-forward="true" selection-start-line="184" selection-start-column="0" selection-end-line="184" selection-end-column="0" />
+            <state relative-caret-position="-299">
+              <caret line="153" column="10" lean-forward="false" selection-start-line="153" selection-start-column="4" selection-end-line="153" selection-end-column="10" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
               </folding>
@@ -297,8 +297,8 @@
     <entry file="file://$PROJECT_DIR$/globalMatting.py" />
     <entry file="file://$PROJECT_DIR$/matting.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2944">
-          <caret line="184" column="0" lean-forward="true" selection-start-line="184" selection-start-column="0" selection-end-line="184" selection-end-column="0" />
+        <state relative-caret-position="-299">
+          <caret line="153" column="10" lean-forward="false" selection-start-line="153" selection-start-column="4" selection-end-line="153" selection-end-column="10" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>

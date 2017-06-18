@@ -142,7 +142,7 @@ def matting(img, trimap):
     foreground = trimap == 255
     background = trimap == 0
     unknown = True ^ np.logical_or(foreground, background)
-    alpha = foreground + 0.5 * unknown
+    alpha = foreground
     rows, cols = unknown.shape
 
     print "calculate border"
@@ -186,6 +186,13 @@ def main():
     alpha = matting(img, trimap)
     rows, cols, channel = img.shape
     show(alpha)
+    count = 0
+    for i in range(0, rows):
+        for j in range(0, cols):
+            if 0 < alpha[i, j] < 1:
+                count = count + 1
+    print "count", count
+
     plt.imshow((alpha.reshape(rows, cols, 1).repeat(3, 2)*img).astype(np.uint8))
     plt.show()
 
