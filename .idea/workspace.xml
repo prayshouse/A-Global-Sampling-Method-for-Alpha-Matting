@@ -17,8 +17,8 @@
       <file leaf-file-name="matting.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/matting.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="685">
-              <caret line="56" column="0" lean-forward="true" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
+            <state relative-caret-position="773">
+              <caret line="83" column="17" lean-forward="false" selection-start-line="83" selection-start-column="17" selection-end-line="83" selection-end-column="17" />
               <folding>
                 <element signature="e#0#31#0" expanded="true" />
               </folding>
@@ -31,9 +31,11 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>global_matting</find>
+      <find>get_nearest_pixel</find>
     </findStrings>
     <replaceStrings>
       <replace>matting</replace>
+      <replace>get_nearest_distance</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -287,8 +289,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/matting.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="685">
-          <caret line="56" column="0" lean-forward="true" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
+        <state relative-caret-position="773">
+          <caret line="83" column="17" lean-forward="false" selection-start-line="83" selection-start-column="17" selection-end-line="83" selection-end-column="17" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>
